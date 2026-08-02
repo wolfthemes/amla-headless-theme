@@ -27,6 +27,11 @@ add_action( 'init', function() {
 	register_post_meta( 'work', '_work_surface', $ml_archi_work_meta_args );
 	register_post_meta( 'work', '_work_completion', $ml_archi_work_meta_args );
 	register_post_meta( 'work', '_work_video_url', $ml_archi_work_meta_args );
+
+	// Ordered project gallery, stored as a comma-separated list of attachment
+	// IDs (e.g. "34,35,36"). The frontend applies its own fixed layout rhythm
+	// to this order — the editor only controls the sequence.
+	register_post_meta( 'work', '_work_gallery', $ml_archi_work_meta_args );
 } );
 
 add_action( 'graphql_register_types', function() {
@@ -64,6 +69,38 @@ add_action( 'graphql_register_types', function() {
 		'description' => esc_html__( 'Video URL for this work.', 'ml-archi' ),
 		'resolve' => function( $post ) {
 			return get_post_meta( $post->ID, '_work_video_url', true );
+		},
+	) );
+
+	// Ordered gallery, exposed as a list of core WPGraphQL MediaItem objects so
+	// the frontend can reuse its usual image selection (sourceUrl, altText,
+	// mediaDetails { width height }). The stored CSV of attachment IDs is
+	// resolved to Post models, preserving the authored order.
+	register_graphql_field( 'Work', 'workGallery', array(
+		'type' => array( 'list_of' => 'MediaItem' ),
+		'description' => esc_html__( 'Ordered project gallery images.', 'ml-archi' ),
+		'resolve' => function( $post, $args, $context, $info ) {
+
+			$raw = get_post_meta( $post->ID, '_work_gallery', true );
+
+			if ( ! $raw ) {
+				return array();
+			}
+
+			$ids = array_filter( array_map( 'absint', explode( ',', $raw ) ) );
+
+			$images = array();
+
+			foreach ( $ids as $id ) {
+				// Resolve to a WPGraphQL Post model (deferred, cache-friendly).
+				$obj = \WPGraphQL\Data\DataSource::resolve_post_object( $id, $context );
+
+				if ( $obj ) {
+					$images[] = $obj;
+				}
+			}
+
+			return $images;
 		},
 	) );
 } );
@@ -126,3 +163,7 @@ add_action( 'admin_footer', function() {
 	</script>
 	<?php
 } );
+
+// Gallery metabox: a hand-rolled WP media picker, since the plugin's shared
+// Metabox class has no multi-image field type. Kept in its own file.
+require_once __DIR__ . '/class-work-gallery-metabox.php';
