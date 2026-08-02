@@ -108,7 +108,17 @@ add_action( 'graphql_register_types', function() {
 // Reuses the plugin's shared Metabox class (array-driven, from wolf-portfolio)
 // instead of hand-rolling a new metabox — this renders as its own box,
 // separate from the plugin's own "Work Details" (Client/Link).
-if ( class_exists( '\WolfPortfolio\Admin\Metabox' ) ) {
+//
+// Instantiated on `init` (not at file scope) so the esc_html__() label
+// arguments aren't evaluated before the ml-archi textdomain is ready —
+// doing so triggers WP 6.7's _load_textdomain_just_in_time notice, whose
+// output then breaks header sending in wp-admin.
+add_action( 'init', function() {
+
+	if ( ! class_exists( '\WolfPortfolio\Admin\Metabox' ) ) {
+		return;
+	}
+
 	new \WolfPortfolio\Admin\Metabox( array(
 		'ML Archi Work Details' => array(
 			'title' => esc_html__( 'Détails complémentaires', 'ml-archi' ),
@@ -137,7 +147,7 @@ if ( class_exists( '\WolfPortfolio\Admin\Metabox' ) ) {
 			),
 		),
 	) );
-}
+} );
 
 /**
  * Cosmetic-only relabel of the plugin's "Client" field to "Maître d'ouvrage"
