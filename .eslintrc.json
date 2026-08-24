@@ -1,0 +1,12 @@
+{
+  "root": true,
+  "extends": ["eslint:recommended", "prettier"],
+  "env": {
+    "browser": true,
+    "jquery": true,
+    "es6": true
+  },
+  "globals": {
+    "wp": "readonly"
+  }
+}

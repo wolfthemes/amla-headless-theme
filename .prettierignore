@@ -1,0 +1,6 @@
+node_modules
+.next
+possibleTypes.json
+# Existing .scss files use tabs; stylelint handles SCSS conventions instead
+# of reformatting them here and creating a huge unrelated diff.
+*.scss
