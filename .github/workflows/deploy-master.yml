@@ -62,12 +62,12 @@ jobs:
           username: ${{ secrets.SSH_USER_PROD }}
           key: ${{ secrets.SSH_PRIVATE_KEY_PROD }}
           port: ${{ secrets.SSH_PORT_PROD }}
-          envs: SSH_PATH
+          envs: SSH_PATH,THEME_NAME
           script: |
-            cd "$SSH_PATH"
+            cd "$SSH_PATH/wp-content/themes/$THEME_NAME"
             git pull origin master
-            # ponytail: assumes standard wp-content/themes/<project> layout to find the site root
-            cd "$(dirname "$(dirname "$(dirname "$SSH_PATH")")")"
+            cd "$SSH_PATH"
             wp cache flush
         env:
           SSH_PATH: ${{ secrets.SSH_PATH_PROD }}
+          THEME_NAME: ${{ github.event.repository.name }}
