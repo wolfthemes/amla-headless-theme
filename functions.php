@@ -31,4 +31,25 @@ add_action( 'init', function () {
 	register_taxonomy_for_object_type( 'post_format', 'work' );
 }, 20 );
 
+// wolf-portfolio (the plugin that registers the "work" CPT) is generalist,
+// shared across other production sites, and doesn't set show_in_graphql —
+// see register-work-fields.php's own note on not touching plugin files.
+// Can't fix this via the usual `register_post_type_args` filter either:
+// the plugin calls register_post_type() at its own file's top level, which
+// runs before this theme's functions.php is even loaded, so a filter added
+// here would never be in place in time. Mutate the already-registered post
+// type object directly instead — WPGraphQL builds its schema per-request,
+// well after `init`, so this is still in time for it.
+add_action( 'init', function () {
+	$work_post_type = get_post_type_object( 'work' );
+
+	if ( ! $work_post_type ) {
+		return;
+	}
+
+	$work_post_type->show_in_graphql     = true;
+	$work_post_type->graphql_single_name = 'work';
+	$work_post_type->graphql_plural_name = 'works';
+}, 20 );
+
 require_once __DIR__ . '/inc/register-work-fields.php';
