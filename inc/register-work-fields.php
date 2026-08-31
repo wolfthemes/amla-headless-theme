@@ -90,7 +90,23 @@ add_action( 'graphql_register_types', function() {
 		'type' => 'String',
 		'description' => esc_html__( 'Video URL for this work.', 'ml-archi' ),
 		'resolve' => function( $post ) {
-			return get_post_meta( $post->ID, '_work_video_url', true );
+			$url = get_post_meta( $post->ID, '_work_video_url', true );
+
+			if ( ! $url ) {
+				return $url;
+			}
+
+			// The metabox stores whatever URL the media picker returns at
+			// selection time — self-hosted, so normally same-origin as
+			// siteurl. siteurl was http:// for a while even though the site
+			// itself has always been served over https, so videos picked
+			// during that window got an http:// URL baked into postmeta,
+			// which the browser then blocks as mixed content in a <video>
+			// src (unlike images, which route through Next's image proxy
+			// and never hit this directly). siteurl is fixed now, but this
+			// normalizes already-saved values too instead of requiring an
+			// editor to notice and re-pick every affected video.
+			return set_url_scheme( $url, 'https' );
 		},
 	) );
 
