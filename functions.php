@@ -40,6 +40,11 @@ add_action( 'init', function () {
 // here would never be in place in time. Mutate the already-registered post
 // type object directly instead — WPGraphQL builds its schema per-request,
 // well after `init`, so this is still in time for it.
+// Priority 1: the "work" CPT is already registered by this point (the
+// plugin calls register_post_type() at its own file's top level, long
+// before any init hook runs), but WPGraphQL itself reads/snapshots
+// show_in_graphql etc. from its own init hook (default priority 10) — this
+// has to win that race and run first, or WPGraphQL never sees the change.
 add_action( 'init', function () {
 	$work_post_type = get_post_type_object( 'work' );
 
@@ -50,6 +55,6 @@ add_action( 'init', function () {
 	$work_post_type->show_in_graphql     = true;
 	$work_post_type->graphql_single_name = 'work';
 	$work_post_type->graphql_plural_name = 'works';
-}, 20 );
+}, 1 );
 
 require_once __DIR__ . '/inc/register-work-fields.php';
