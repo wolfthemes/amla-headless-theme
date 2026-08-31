@@ -17,6 +17,11 @@ add_action( 'after_setup_theme', function () {
 	add_theme_support( 'title-tag' );
 	add_theme_support( 'editor-styles' );
 	add_editor_style( 'editor-style.css' );
+
+	// Post formats for the Work CPT (standard, gallery, video) — exposed to
+	// the frontend via WPGraphQL's built-in Post_Format taxonomy support.
+	add_theme_support( 'post-formats', array( 'gallery', 'video' ) );
+	add_post_type_support( 'work', 'post-formats' );
 } );
 
 require_once __DIR__ . '/inc/register-work-fields.php';
