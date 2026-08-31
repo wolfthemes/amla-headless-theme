@@ -32,6 +32,7 @@ jobs:
             git rev-parse HEAD
             cd "$SSH_PATH"
             wp cache flush
+            wp eval 'if ( function_exists( "opcache_reset" ) ) { opcache_reset(); }'
         env:
           SSH_PATH: ${{ secrets.SSH_PATH_STAGE }}
           THEME_NAME: ${{ github.event.repository.name }}
