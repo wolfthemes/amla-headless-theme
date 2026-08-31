@@ -1,0 +1,3 @@
+## Project
+
+Backend half of the AMLA (ml-archi) freelance headless site — a minimal WordPress theme (no public templates, WP just requires an active theme). Real work is CPTs/fields in `functions.php`/`inc/` (e.g. the "Work" CPT with project gallery field), exposed to the Next.js frontend (`amla-frontend`, sibling repo) via WPGraphQL. Deploys to `amla-backend-staging.saguin.com` via GitHub Actions (SSH to the WP root, not the theme dir). Durable notes (architecture, decisions, status) live in the `wolf-claude-memory` KB — see `wiki/projects/amla.md` and `wiki/concepts/faust-headless-wordpress-stack.md`. Target: ship during September 2026.
