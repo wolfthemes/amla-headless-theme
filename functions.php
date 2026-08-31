@@ -55,6 +55,16 @@ add_action( 'init', function () {
 	$work_post_type->show_in_graphql     = true;
 	$work_post_type->graphql_single_name = 'work';
 	$work_post_type->graphql_plural_name = 'works';
+
+	// This WPGraphQL version (2.20.0) also reads these two — confirmed via
+	// wp-debug.log ("Undefined property: WP_Post_Type::$graphql_kind" /
+	// "...$graphql_register_root_connection" from PostObject.php /
+	// PostObjects.php). Without graphql_register_root_connection explicitly
+	// true, WPGraphQL registers the Work object type but skips generating
+	// the works/work root query connection fields entirely — which was the
+	// actual missing piece the three properties above weren't enough for.
+	$work_post_type->graphql_kind                     = 'object';
+	$work_post_type->graphql_register_root_connection = true;
 }, 1 );
 
 require_once __DIR__ . '/inc/register-work-fields.php';
