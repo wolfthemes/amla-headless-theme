@@ -40,6 +40,28 @@ add_action( 'graphql_register_types', function() {
 		return;
 	}
 
+	// Client/Link are the plugin's own fields (its metabox, in
+	// wolf-portfolio/inc/admin/wfolio-metaboxes.php as _work_client/
+	// _work_link) — the plugin defines the admin UI for them but never
+	// exposes them to GraphQL, same gap as the CPT/taxonomy registration
+	// itself. Exposed here rather than in the plugin per this file's own
+	// boundary (see file docblock).
+	register_graphql_field( 'Work', 'workClient', array(
+		'type' => 'String',
+		'description' => esc_html__( 'Client for this work.', 'ml-archi' ),
+		'resolve' => function( $post ) {
+			return get_post_meta( $post->ID, '_work_client', true );
+		},
+	) );
+
+	register_graphql_field( 'Work', 'workLink', array(
+		'type' => 'String',
+		'description' => esc_html__( 'External link for this work.', 'ml-archi' ),
+		'resolve' => function( $post ) {
+			return get_post_meta( $post->ID, '_work_link', true );
+		},
+	) );
+
 	register_graphql_field( 'Work', 'workProgram', array(
 		'type' => 'String',
 		'description' => esc_html__( 'Program for this work.', 'ml-archi' ),
