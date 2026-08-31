@@ -65,6 +65,21 @@ add_action( 'init', function () {
 	// actual missing piece the three properties above weren't enough for.
 	$work_post_type->graphql_kind                     = 'object';
 	$work_post_type->graphql_register_root_connection = true;
+
+	// Same gap, same fix, for the work_type taxonomy (wolf-portfolio's
+	// register_taxonomy() call has no graphql args either — see
+	// wfolio-register-taxonomy.php) — the frontend queries it as
+	// `workTypes` on Work.
+	$work_type_taxonomy = get_taxonomy( 'work_type' );
+
+	if ( ! $work_type_taxonomy ) {
+		return;
+	}
+
+	$work_type_taxonomy->show_in_graphql     = true;
+	$work_type_taxonomy->graphql_single_name = 'workType';
+	$work_type_taxonomy->graphql_plural_name = 'workTypes';
+	$work_type_taxonomy->graphql_kind        = 'object';
 }, 1 );
 
 require_once __DIR__ . '/inc/register-work-fields.php';
