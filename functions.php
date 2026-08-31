@@ -80,6 +80,11 @@ add_action( 'init', function () {
 	$work_type_taxonomy->graphql_single_name = 'workType';
 	$work_type_taxonomy->graphql_plural_name = 'workTypes';
 	$work_type_taxonomy->graphql_kind        = 'object';
+	// Mirrors the CPT fix: show_in_graphql/names/kind alone got the
+	// WorkType object type registered but not the workTypes connection
+	// field on Work — this is the property that specifically wires up a
+	// connection rather than just the type itself.
+	$work_type_taxonomy->graphql_register_root_connection = true;
 }, 1 );
 
 require_once __DIR__ . '/inc/register-work-fields.php';
