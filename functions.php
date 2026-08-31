@@ -65,6 +65,12 @@ add_action( 'init', function () {
 	// actual missing piece the three properties above weren't enough for.
 	$work_post_type->graphql_kind                     = 'object';
 	$work_post_type->graphql_register_root_connection = true;
+	// A separate property from the one above: traced directly from
+	// RootQuery.php — the singular work(id: ...) root field is built from
+	// \WPGraphQL::get_allowed_post_types('objects', ['graphql_register_root_field' => true]),
+	// a completely different filter/property than the plural connection.
+	// graphql_register_root_connection alone fixed `works`; this fixes `work`.
+	$work_post_type->graphql_register_root_field = true;
 
 	// Same gap, same fix, for the work_type taxonomy (wolf-portfolio's
 	// register_taxonomy() call has no graphql args either — see
@@ -85,6 +91,10 @@ add_action( 'init', function () {
 	// field on Work — this is the property that specifically wires up a
 	// connection rather than just the type itself.
 	$work_type_taxonomy->graphql_register_root_connection = true;
+	// Same singular/plural split as the CPT above — set proactively so the
+	// singular workType(id: ...) field doesn't need its own separate
+	// round-trip once something queries it.
+	$work_type_taxonomy->graphql_register_root_field = true;
 }, 1 );
 
 require_once __DIR__ . '/inc/register-work-fields.php';
