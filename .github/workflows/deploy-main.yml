@@ -1,73 +1,27 @@
-name: Deploy to production
+name: Deploy theme to IONOS
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
+  workflow_dispatch:   # permet aussi de lancer le déploiement manuellement depuis GitHub
 
 jobs:
-  check:
+  deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout du code
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Déploiement via SFTP
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
         with:
-          node-version: '22'
-          cache: npm
-
-      - uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.3'
-          tools: composer
-          coverage: none
-
-      - name: Cache Composer dependencies
-        uses: actions/cache@v4
-        with:
-          path: vendor
-          key: composer-${{ hashFiles('composer.lock') }}
-          restore-keys: composer-
-
-      - name: Install JS dependencies
-        run: npm ci
-
-      - name: Install PHP dependencies
-        run: composer install --no-interaction --prefer-dist
-
-      - name: Lint JS
-        run: npm run lint:js
-
-      - name: Lint CSS
-        run: npm run lint:css
-
-      - name: Lint PHP
-        run: ./vendor/bin/phpcs --standard=./.phpcs.xml.dist --runtime-set ignore_warnings_on_exit 1
-
-  deploy-main:
-    runs-on: ubuntu-latest
-    needs: check
-    steps:
-      - name: Setup SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY_PROD }}" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -p ${{ secrets.SSH_PORT_PROD }} ${{ secrets.SSH_HOST_PROD }} >> ~/.ssh/known_hosts
-
-      - name: Deploy via git pull
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST_PROD }}
-          username: ${{ secrets.SSH_USER_PROD }}
-          key: ${{ secrets.SSH_PRIVATE_KEY_PROD }}
-          port: ${{ secrets.SSH_PORT_PROD }}
-          envs: SSH_PATH,THEME_NAME
-          script: |
-            cd "$SSH_PATH/wp-content/themes/$THEME_NAME"
-            git pull origin main
-            cd "$SSH_PATH"
-            wp cache flush
-        env:
-          SSH_PATH: ${{ secrets.SSH_PATH_PROD }}
-          THEME_NAME: ${{ github.event.repository.name }}
+          server: ${{ secrets.IONOS_HOST }}
+          username: ${{ secrets.IONOS_USER }}
+          password: ${{ secrets.IONOS_PASSWORD }}
+          port: 22
+          # Dossier local contenant le thème (à adapter selon votre repo)
+          local_path: './*'
+          # Chemin distant vers le dossier du thème sur IONOS
+          remote_path: '${{ secrets.IONOS_PATH }}/wp-content/themes/amla-headless-theme'
+          # Optionnel : exclure des fichiers/dossiers inutiles
+          # sftpArgs: '-o ConnectTimeout=5'
