@@ -167,7 +167,7 @@ add_action( 'admin_footer', function() {
 	document.addEventListener('DOMContentLoaded', function() {
 		var label = document.querySelector('label[for="_work_client"]');
 		if ( label ) {
-			label.textContent = <?php echo wp_json_encode( esc_html__( "Maître d'ouvrage", 'ml-archi' ) ); ?>;
+			label.textContent = <?php echo wp_json_encode( __( "Maître d'ouvrage", 'ml-archi' ) ); ?>;
 		}
 	});
 	</script>
