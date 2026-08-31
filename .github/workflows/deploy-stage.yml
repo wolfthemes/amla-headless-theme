@@ -25,8 +25,11 @@ jobs:
           port: ${{ secrets.SSH_PORT_STAGE }}
           envs: SSH_PATH,THEME_NAME
           script: |
+            set -e
             cd "$SSH_PATH/wp-content/themes/$THEME_NAME"
+            git status --porcelain
             git pull origin stage
+            git rev-parse HEAD
             cd "$SSH_PATH"
             wp cache flush
         env:
